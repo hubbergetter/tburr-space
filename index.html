@@ -13,33 +13,52 @@
   <nav class="sidebar">
     <h2>Physics Apps</h2>
     <ul>
-       <li class="menu-item active" data-app="color-filters">
+      <li class="menu-item active" data-app="color-filters">
         Color Filters
-       </li>
-       <li class="menu-item" data-app="graphing-calc">
-         Color Mixing
-        </li>
-       </ul>
+      </li>
+      <li class="menu-item" data-app="graphing-calc">
+        Color Mixing
+      </li>
+    </ul>
   </nav>
 
   <!-- Main Content Area -->
   <main class="main-panel">
 
-  <div>
-    <div class="preview-container">
-      ...
+    <div class="content-wrapper">
+
+      <div class="preview-container">
+
+        <img id="preview-image"
+             src="images/color-filters-preview.png"
+             alt="Color Filters Preview">
+
+        <a id="launch-link"
+           href="apps/color-filters/index.html"
+           target="_blank"
+           class="play-overlay">
+
+          <div class="play-button">
+            <div class="triangle"></div>
+          </div>
+
+        </a>
+
+      </div>
+
+      <div class="app-description" id="app-description">
+        Interactive RGB and subtractive filter exploration tool.
+      </div>
+
     </div>
 
-    <div class="app-description" id="app-description">
-      Interactive RGB and subtractive filter exploration tool.
-    </div>
-  </div>
+  </main>
 
-</main>
 </div>
 
 <script src="script.js"></script>
 
 </body>
 </html>
+
 
