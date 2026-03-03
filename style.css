@@ -29,11 +29,8 @@ body {
 .menu-item {
   padding: 10px;
   cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.menu-item:hover {
-  background: #eaeaea;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
 }
 
 .menu-item.active {
@@ -49,6 +46,7 @@ body {
   align-items: center;
 }
 
+/* Preview container */
 .preview-container {
   position: relative;
   border: 1px solid #333;
@@ -56,22 +54,45 @@ body {
 }
 
 .preview-container img {
-  max-width: 700px;
   display: block;
+  max-width: 700px;
 }
 
-/* Launch Arrow */
-.launch-arrow {
+/* Overlay link */
+.play-overlay {
   position: absolute;
-  bottom: 15px;
-  right: 15px;
-  font-size: 36px;
-  background: white;
-  border: 1px solid #333;
-  padding: 5px 12px;
-  cursor: pointer;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
 }
 
-.launch-arrow:hover {
-  background: #ddd;
+/* Play button circle */
+.play-button {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease, background 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+/* Triangle */
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 26px solid #333;
+  border-top: 16px solid transparent;
+  border-bottom: 16px solid transparent;
+  margin-left: 6px;
+}
+
+/* Hover effect */
+.play-overlay:hover .play-button {
+  background: rgba(255, 255, 255, 0.9);
+  transform: scale(1.08);
 }
