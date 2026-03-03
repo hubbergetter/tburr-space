@@ -2,30 +2,258 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Color Filters App</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 40px;
-  }
+<title>RGB Light Through Filters - Full Version</title>
 
-  a {
-    display: inline-block;
-    margin-top: 20px;
-    text-decoration: none;
-    color: black;
-    border: 1px solid #333;
-    padding: 8px 16px;
-  }
+<style>
+body {
+  font-family: sans-serif;
+  background: #f0f0f0;
+  text-align: center;
+}
+
+canvas {
+  border: 1px solid black;
+  background: #ddd;
+  margin-top: 15px;
+}
+
+.controls {
+  margin-top: 15px;
+}
+
+select, button {
+  margin: 5px;
+  padding: 5px 8px;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
 
-<h1>Color Filters</h1>
-<p>This is the landing page for the Color Filters app.</p>
+<h2>Light Through Colored Filters</h2>
 
-<a href="../../index.html">← Back to Hub</a>
+<div class="controls">
+
+  <label>Source Light:</label>
+  <select id="sourceSelect">
+    <option value="rgb">R + G + B (White)</option>
+    <option value="rg">R + G (Yellow)</option>
+    <option value="rb">R + B (Magenta)</option>
+    <option value="gb">G + B (Cyan)</option>
+    <option value="r">Red Only</option>
+    <option value="g">Green Only</option>
+    <option value="b">Blue Only</option>
+  </select>
+
+  <label>Number of Filters:</label>
+  <select id="filterCount">
+    <option value="1">1</option>
+    <option value="2" selected>2</option>
+  </select>
+
+  <label>Filter 1:</label>   
+  <select id="filter1Color"></select>
+
+  <label>Filter 2:</label>
+  <select id="filter2Color"></select>
+
+  <button id="startBtn">Start</button>
+  <button id="pauseBtn">Pause</button>
+
+</div>
+
+<canvas id="canvas" width="1000" height="320"></canvas>
+
+<script>
+// --------------------------------------------------
+// FILTER PASS TABLE, a JavaScript object
+// --------------------------------------------------
+const filterPassTable = {
+  red: ["r"],
+  green: ["g"],
+  blue: ["b"],
+  yellow: ["r", "g"],
+  magenta: ["r", "b"],
+  cyan: ["g", "b"]
+};
+
+//Populate dropdowns: Lines 81 -89
+const filterColors = Object.keys(filterPassTable); //filterColors: an array of key values from the filterPassTable object, 
+                                                   //examples, "red" or "cyan" that are inserted into the HTML <select>
+const f1Select = document.getElementById("filter1Color"); //Access html select element to be filled, which is filter1Color
+const f2Select = document.getElementById("filter2Color"); //Access html select element to be filled, which is filter1Color
+
+//Next, insert actual colors into the dropdowns for each rgb name (e.g. cyan) in the array filterColors, i.e.grab the value's key
+filterColors.forEach(color => {
+  f1Select.innerHTML += `<option value="${color}">${color}</option>`;
+  f2Select.innerHTML += `<option value="${color}">${color}</option>`;
+});
+
+// --------------------------------------------------
+// Arrow Class, Instantiated in SetSection
+// --------------------------------------------------
+class Arrow {
+  constructor(colorName, y) {
+    this.colorName = colorName;
+    this.y = y;
+    this.x = 0;
+    this.speed = 2;
+    this.intensity = 1.0;
+  }
+
+  reset() {
+    this.x = 0;
+    this.intensity = 1.0;
+  }
+
+  update() {
+    this.x += this.speed;
+  }
+
+  applyFilter(filter) {
+    if (!filter.passes.includes(this.colorName)) {
+      this.intensity = 0;
+    }
+  }
+
+  getColorString() {
+    const r = this.colorName === "r" ? 255 * this.intensity : 0;
+    const g = this.colorName === "g" ? 255 * this.intensity : 0;
+    const b = this.colorName === "b" ? 255 * this.intensity : 0;
+    return `rgb(${r},${g},${b})`;
+  }
+
+  draw(ctx) {
+  //Draw an arrow in two steps: First the rectangular part and then the triangular part.
+    if (this.intensity <= 0) return;  //If an arrow has no color, don't draw it, and return.
+	//Set the fill style for each part, rectangle and tip
+    ctx.fillStyle = this.getColorString();
+
+	//Draw and fill the rectangle.
+    ctx.fillRect(this.x, this.y, 90, 12);
+	//Draw and fill the tip
+	ctx.beginPath();
+    ctx.moveTo(this.x + 90, this.y - 6);
+    ctx.lineTo(this.x + 115, this.y + 6);
+    ctx.lineTo(this.x + 90, this.y + 18);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+// --------------------------------------------------
+// Filter Class  Instantiated in the Setup section
+// --------------------------------------------------
+class Filter {
+  constructor(x, colorName) {
+    this.x = x;
+    this.colorName = colorName;
+    this.passes = filterPassTable[colorName];
+  }
+
+  draw(ctx) {
+    ctx.fillStyle = this.colorName;
+    ctx.beginPath();
+    ctx.ellipse(this.x, 160, 40, 100, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// --------------------------------------------------
+// Setup
+// --------------------------------------------------
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let arrows = [];
+let filters = [];
+
+let running = false;
+let paused = false;
+
+// An objet for Fixed vertical positions of the arrows for clarity (Used lines 190-192)
+const yPositions = {
+  r: 80,
+  g: 150,
+  b: 220
+};
+
+function setupFromControls() { //called when start button clicked
+
+  arrows = [];
+  filters = [];
+
+  const sourceValue = document.getElementById("sourceSelect").value;
+  const filterCount = parseInt(document.getElementById("filterCount").value);
+
+  // Create the arrows with the color & y position of each arrow.  For y positions, refer back to lines 175 - 179
+  if (sourceValue.includes("r")) arrows.push(new Arrow("r", yPositions.r));
+  if (sourceValue.includes("g")) arrows.push(new Arrow("g", yPositions.g));
+  if (sourceValue.includes("b")) arrows.push(new Arrow("b", yPositions.b));
+
+  // Create filters
+  const f1Color = f1Select.value; //f1Color set at line 88
+  //Create the first filter an push it into the filters[] array.
+  filters.push(new Filter(400, f1Color)); //400 is an x position
+
+  if (filterCount === 2) {
+    const f2Color = f2Select.value;  //f2Color set on line 89
+	//Create the second filter an push it into the filters[] array.
+    filters.push(new Filter(750, f2Color));  //750 is an x position
+  }
+
+  running = true;
+  paused = false;
+  document.getElementById("pauseBtn").textContent = "Pause";
+}
+
+// --------------------------------------------------
+// Animation Loop
+// --------------------------------------------------
+function animate() {
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  filters.forEach(filter => filter.draw(ctx));
+
+  if (running && !paused) {
+    arrows.forEach(arrow => {
+
+      arrow.update();
+
+      filters.forEach(filter => {
+        if (arrow.x + 115 > filter.x) {
+          arrow.applyFilter(filter);
+        }
+      });
+
+      arrow.draw(ctx);
+    });
+  } else {
+    arrows.forEach(arrow => arrow.draw(ctx));
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// --------------------------------------------------
+// Buttons
+// --------------------------------------------------
+document.getElementById("startBtn").addEventListener("click", function () {
+  setupFromControls();
+});
+
+document.getElementById("pauseBtn").addEventListener("click", function () {
+
+  if (!running) return;
+
+  paused = !paused;
+
+  this.textContent = paused ? "Resume" : "Pause";
+});
+</script>
 
 </body>
 </html>
