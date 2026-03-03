@@ -1,5 +1,6 @@
 .preview-container {
   position: relative;
+  display: inline-block;   /* KEY FIX */
   border: 1px solid #333;
   background: white;
 }
@@ -29,6 +30,7 @@
   background: red !important;   /* TEMP TEST */
   border-radius: 50%;
 }
+
 
 
 
