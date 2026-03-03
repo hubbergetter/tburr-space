@@ -12,6 +12,12 @@
   height: 100vh;
 }
 
+.app-description {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 16px;
+  max-width: 700px;
+}
 .preview-container {
   position: relative;
   display: inline-block;   /* KEY FIX */
@@ -63,6 +69,7 @@
   background: rgba(255, 255, 255, 0.95);
   transform: scale(1.08);
 }
+
 
 
 
