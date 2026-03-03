@@ -7,7 +7,8 @@
 
 .preview-container img {
   display: block;
-  max-width: 700px;
+  width: 700px;   /* Force predictable width */
+  height: auto;
 }
 
 /* Overlay link */
@@ -30,6 +31,7 @@
   background: red !important;   /* TEMP TEST */
   border-radius: 50%;
 }
+
 
 
 
