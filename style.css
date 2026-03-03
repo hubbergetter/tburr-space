@@ -56,6 +56,8 @@ body {
 .preview-container img {
   display: block;
   max-width: 700px;
+  position: relative;
+  z-index: 1;
 }
 
 /* Overlay link */
@@ -96,3 +98,4 @@ body {
   background: rgba(255, 255, 255, 0.9);
   transform: scale(1.08);
 }
+
