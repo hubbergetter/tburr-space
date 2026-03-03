@@ -2,35 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Physics Apps Hub</title>
+<title>Physics Apps</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
 
-  <!-- Side Menu -->
+  <!-- Sidebar -->
   <nav class="sidebar">
     <h2>Physics Apps</h2>
     <ul>
-      <li class="menu-item active" data-app="color-filters">Color Filters</li>
+      <li class="menu-item active" data-app="color-filters">
+        Color Filters
+      </li>
     </ul>
   </nav>
 
-  <!-- Main Display Area -->
+  <!-- Main Content Area -->
   <main class="main-panel">
+
     <div class="preview-container">
-      <img id="preview-image" src="images/color-filters-preview.png" alt="App Preview">
-      
-      <!-- Arrow Overlay -->
-      <a id="launch-link" href="apps/color-filters/index.html" target="_blank">
-        <div class="launch-arrow">➜</div>
+
+      <img id="preview-image"
+           src="images/color-filters-preview.png"
+           alt="Color Filters Preview">
+
+      <!-- Play Button Overlay -->
+      <a id="launch-link"
+         href="apps/color-filters/index.html"
+         target="_blank"
+         class="play-overlay">
+
+        <div class="play-button">
+          <div class="triangle"></div>
+        </div>
+
       </a>
+
     </div>
+
   </main>
 
 </div>
 
 <script src="script.js"></script>
+
 </body>
 </html>
