@@ -2,30 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Color Filters App</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 40px;
-  }
-
-  a {
-    display: inline-block;
-    margin-top: 20px;
-    text-decoration: none;
-    color: black;
-    border: 1px solid #333;
-    padding: 8px 16px;
-  }
-</style>
+<title>Physics Apps</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Color Filters</h1>
-<p>This is the landing page for the Color Filters app.</p>
+<div class="container">
 
-<a href="../../index.html">← Back to Hub</a>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h2>Physics Apps</h2>
+    <ul>
+      <li class="menu-item active" data-app="color-filters">
+        Color Filters
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-panel">
+
+    <div class="preview-container">
+
+      <img id="preview-image"
+           src="images/color-filters-preview.png"
+           alt="Color Filters Preview">
+
+      <!-- Play Button Overlay -->
+      <a id="launch-link"
+         href="apps/color-filters/index.html"
+         target="_blank"
+         class="play-overlay">
+
+        <div class="play-button">
+          <div class="triangle"></div>
+        </div>
+
+      </a>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
