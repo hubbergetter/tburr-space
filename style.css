@@ -1,3 +1,44 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #ffffff;
+  border-right: 1px solid #ccc;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu-item {
+  padding: 10px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  margin-bottom: 8px;
+}
+
+.menu-item.active {
+  border: 1px solid #333;
+  font-weight: bold;
+}
+
 /* Main Panel */
 .main-panel {
   flex: 1;
@@ -7,27 +48,33 @@
   padding: 40px;
   box-sizing: border-box;
 }
-.container {
+
+/* Wrapper */
+.content-wrapper {
   display: flex;
-  height: 100vh;
+  flex-direction: column;
+  align-items: center;
 }
 
+/* Description */
 .app-description {
   margin-top: 15px;
   text-align: center;
   font-size: 16px;
   max-width: 700px;
 }
+
+/* Preview */
 .preview-container {
   position: relative;
-  display: inline-block;   /* KEY FIX */
+  display: inline-block;
   border: 1px solid #333;
   background: white;
 }
 
 .preview-container img {
   display: block;
-  width: 700px;   /* Force predictable width */
+  width: 700px;
   height: auto;
 }
 
@@ -44,6 +91,7 @@
   text-decoration: none;
 }
 
+/* Play button */
 .play-button {
   width: 90px;
   height: 90px;
@@ -56,10 +104,11 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Triangle */
 .triangle {
   width: 0;
   height: 0;
-  border-left: 28px solid #333;
+  border-left: 28px solid #000;
   border-top: 18px solid transparent;
   border-bottom: 18px solid transparent;
   margin-left: 6px;
@@ -69,6 +118,7 @@
   background: rgba(255, 255, 255, 0.95);
   transform: scale(1.08);
 }
+
 
 
 
