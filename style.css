@@ -26,8 +26,9 @@
 .play-button {
   width: 100px;
   height: 100px;
-  background: red;   /* TEMP TEST */
+  background: red !important;   /* TEMP TEST */
   border-radius: 50%;
 }
+
 
 
