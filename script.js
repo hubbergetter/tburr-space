@@ -12,18 +12,19 @@ menuItems.forEach(item => {
     const appName = this.dataset.app;
 
     if (appName === "color-filters") {
-      previewImage.src = "images/color-filters-preview.png";
-      launchLink.href = "apps/color-filters/index.html";
-      description.textContent =
-        "Interactive RGB and subtractive filter exploration tool.";
+        previewImage.src = "images/color-filters-preview.png";
+        launchLink.href = "apps/color-filters/index.html";
+        description.textContent =
+          "Interactive RGB and subtractive filter exploration tool.";
     }
 
-    if (appName === "graphing-calc") {
-      previewImage.src = "images/color-filters-preview.png"; // temporary reuse
-      launchLink.href = "#";
-      description.textContent =
-        "Dynamic function graphing and intersection analysis tool (coming soon).";
-    }
+    if (appName === "graphics-calculator") {
+        previewImage.src = "images/graphics-calc-preview.png";
+        launchLink.href = "apps/graphics-calculator/index.html";
+        description.textContent =
+           "Dynamic function graphing tool with trace and intersection modes.";
+        }
 
   });
 });
+
