@@ -146,8 +146,13 @@ const filterColors = Object.keys(filterPassTable); //filterColors: an array of k
 const f1Select = document.getElementById("filter1Color"); //Access html select element to be filled, which is filter1Color
 const f2Select = document.getElementById("filter2Color"); //Access html select element to be filled, which is filter2Color
 filterColors.forEach(color => {
-  f1Select.innerHTML += `<option value="${color}">${color}</option>`;
-  f2Select.innerHTML += `<option value="${color}">${color}</option>`;
+
+  const selected1 = color === "cyan" ? "selected" : "";
+  const selected2 = color === "yellow" ? "selected" : "";
+
+  f1Select.innerHTML += `<option value="${color}" ${selected1}>${color}</option>`;
+  f2Select.innerHTML += `<option value="${color}" ${selected2}>${color}</option>`;
+
 });
 
 // Default filter colors
