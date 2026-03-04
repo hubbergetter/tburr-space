@@ -26,6 +26,19 @@ select, button {
   padding: 5px 8px;
   font-size: 14px;
 }
+.instructions {
+  width: 900px;
+  margin: 25px auto;
+  text-align: left;
+  background: white;
+  padding: 18px;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.instructions h3 {
+  margin-top: 0;
+}
 </style>
 </head>
 <body>
@@ -132,6 +145,14 @@ const filterColors = Object.keys(filterPassTable); //filterColors: an array of k
                                                    //examples, "red" or "cyan" that are inserted into the HTML <select>
 const f1Select = document.getElementById("filter1Color"); //Access html select element to be filled, which is filter1Color
 const f2Select = document.getElementById("filter2Color"); //Access html select element to be filled, which is filter1Color
+filterColors.forEach(color => {
+  f1Select.innerHTML += `<option value="${color}">${color}</option>`;
+  f2Select.innerHTML += `<option value="${color}">${color}</option>`;
+});
+
+// Default filter colors
+f1Select.value = "cyan";
+f2Select.value = "yellow";
 
 //Next, insert actual colors into the dropdowns for each rgb name (e.g. cyan) in the array filterColors, i.e.grab the value's key
 filterColors.forEach(color => {
