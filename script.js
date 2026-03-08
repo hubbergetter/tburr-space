@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       if (appName === "color-mixing") {
-        previewImage.src = "images/rgb-cym-preview.png";
+        previewImage.src = "images/color-mixing.png";
         launchLink.href = "apps/color-mixing/index.html";
       }
 
@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
 });
+
 
 
 
