@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RGB / CMY Venn Diagram with Colored Light</title>
+
+<style>
+  body {
+    font-family: monospace;
+    background: #111;
+    color: white;
+    padding: 20px;
+  }
+
+  .container {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+  }
+
+  canvas {
+    border: 1px solid white;
+    display: block;
+  }
+
+  .controls {
+    width: 340px;
+  }
+
+  label {
+    display: block;
+    margin-top: 15px;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+
+  select {
+    width: 100%;
+    padding: 5px;
+    font-family: monospace;
+  }
+
+  .box {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid white;
+  }
+
+  /* Canvas + explanation stacked vertically */
+  .diagram-area{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .diagram-explanation{
+    margin-top:10px;
+    width:520px;
+    text-align:center;
+    font-size:14px;
+    line-height:1.4;
+    color:#ddd;
+  }
+
+  /* Instructions */
+  #instructions h3{
+    margin: 0 0 8px 0;
+    font-size: 16px;
+  }
+  #instructions ul{
+    margin: 8px 0 0 18px;
+    padding: 0;
+  }
+  #instructions li{
+    margin: 4px 0;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>RGB (Light) / CMY (Pigment) Simulator</h1>
+
+<div class="container">
+
+  <div class="diagram-area">
+    <canvas id="canvas" width="520" height="480"></canvas>
+
+    <div class="diagram-explanation">
+      RGB mixing adds colored light together, which is how televisions and computer screens create color.<br><br>
+      CMY mixing removes wavelengths from white light, which is how paints, inks, and pigments create color.
+    </div>
+  </div>
+
+  <div class="controls">
+
+    <!-- NOTE: labels have IDs so JS can change them -->
+    <label id="label1">Red: <span id="val1"></span></label>
+    <input type="range" id="slider1" min="0" max="255" value="128">
+
+    <label id="label2">Green: <span id="val2"></span></label>
+    <input type="range" id="slider2" min="0" max="255" value="128">
+
+    <label id="label3">Blue: <span id="val3"></span></label>
+    <input type="range" id="slider3" min="0" max="255" value="128">
+
+    <div class="box">
+      <strong>Mode</strong>
+      <label style="margin-top:10px;">
+        <input type="radio" name="mode" value="rgb" checked>
+        Additive (RGB / Light)
+      </label>
+      <label style="margin-top:10px;">
+        <input type="radio" name="mode" value="cmy">
+        Subtractive (CMY / Pigment)
+      </label>
+    </div>
+
+    <div class="box">
+      <strong>Illuminant (Light Color)</strong>
+      <select id="lightSelect">
+         <option value="white">White (255,255,255)</option>
+         <option value="yellow">Yellow (255,255,0)</option>
+         <option value="red">Red (255,0,0)</option>
+         <option value="green">Green (0,255,0)</option>
+         <option value="blue">Blue (0,0,255)</option>
+         <option value="cyan">Cyan (0,255,255)</option>
+       <option value="magenta">Magenta (255,0,255)</option>
+</select>
+      <div style="margin-top:8px; color:#ccc; font-size:13px;">
+        (Illuminant matters most in CMY mode.)
+      </div>
+    </div>
+
+    <div class="box">
+      <strong>Output</strong><br>
+      <span id="outputText"></span>
+    </div>
+
+    <div class="box" id="instructions"></div>
+
+  </div>
+
+</div>
+
+<script>
+//-------------------------------------------------------------
+// STATE
+//-------------------------------------------------------------
+const state = {
+  mode: "rgb",   // "rgb" or "cmy"
+  a: 128,        // slider1 value
+  b: 128,        // slider2 value
+  c: 128,        // slider3 value
+  light: "white" // illuminant
+};
+
+
+//-------------------------------------------------------------
+// ELEMENTS
+//-------------------------------------------------------------
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const slider1 = document.getElementById("slider1");
+const slider2 = document.getElementById("slider2");
+const slider3 = document.getElementById("slider3");
+
+const val1 = document.getElementById("val1");
+const val2 = document.getElementById("val2");
+const val3 = document.getElementById("val3");
+
+const label1 = document.getElementById("label1");
+const label2 = document.getElementById("label2");
+const label3 = document.getElementById("label3");
+
+const lightSelect = document.getElementById("lightSelect");
+const outputText = document.getElementById("outputText");
+const instructionsBox = document.getElementById("instructions");
+
+
+//-------------------------------------------------------------
+// INSTRUCTIONS (mode-specific)
+//-------------------------------------------------------------
+const instructionText = {
+  rgb: `
+    <h3>RGB Mode — Additive Color Mixing (Light)</h3>
+    <ul>
+      <li>Move the <b>Red</b>, <b>Green</b>, and <b>Blue</b> sliders to change the brightness of each light.</li>
+      <li>Where two circles overlap, the light <b>adds together</b>.</li>
+      <li>Red + Green = Yellow</li>
+      <li>Red + Blue = Magenta</li>
+      <li>Green + Blue = Cyan</li>
+      <li>All three together produce <b>white light</b>.</li>
+    </ul>
+    <div style="margin-top:10px; color:#ccc; font-size:13px;">
+      Screens and projectors create color by adding red, green, and blue light.
+    </div>
+  `,
+  cmy: `
+    <h3>CMY Mode — Subtractive Color Mixing (Pigments)</h3>
+    <ul>
+      <li>The circles represent colored <b>pigments/inks</b>.</li>
+      <li>The sliders control how strongly each pigment removes light.</li>
+      <li><b>Cyan</b> removes red light.</li>
+      <li><b>Magenta</b> removes green light.</li>
+      <li><b>Yellow</b> removes blue light.</li>
+      <li>Where pigments overlap, more wavelengths are removed, so the result gets <b>darker</b>.</li>
+      <li>The <b>illuminant</b> is the light shining on the pigments.</li>
+    </ul>
+    <div style="margin-top:10px; color:#ccc; font-size:13px;">
+      Printing and paint create color by removing wavelengths from the incoming light.
+    </div>
+  `
+};
+
+
+//-------------------------------------------------------------
+// HELPERS
+//-------------------------------------------------------------
+function clamp255(n){
+  n = Number(n);
+  if (Number.isNaN(n)) return 0;
+  if (n < 0) return 0;
+  if (n > 255) return 255;
+  return n;
+}
+
+function getLightRGB(name) {
+
+  if (name === "white")   return { r:255, g:255, b:255 };
+  if (name === "yellow")  return { r:255, g:255, b:0   };
+  if (name === "red")     return { r:255, g:0,   b:0   };
+  if (name === "green")   return { r:0,   g:255, b:0   };
+  if (name === "blue")    return { r:0,   g:0,   b:255 };
+  if (name === "cyan")    return { r:0,   g:255, b:255 };
+  if (name === "magenta") return { r:255, g:0,   b:255 };
+
+  return { r:255, g:255, b:255 };
+
+}
+
+function rgbString(rgb){
+  return `(${rgb.r},${rgb.g},${rgb.b})`;
+}
+
+
+//-------------------------------------------------------------
+// UI UPDATERS
+//-------------------------------------------------------------
+function updateSliderNumbers() {
+  val1.textContent = state.a;
+  val2.textContent = state.b;
+  val3.textContent = state.c;
+}
+
+function updateSliderLabels() {
+  // IMPORTANT: label text is the first text node in the label
+  // We want to change only "Red:" part, not the value span.
+  const t1 = label1.childNodes[0];
+  const t2 = label2.childNodes[0];
+  const t3 = label3.childNodes[0];
+
+  if (state.mode === "rgb") {
+    if (t1) t1.textContent = "Red: ";
+    if (t2) t2.textContent = "Green: ";
+    if (t3) t3.textContent = "Blue: ";
+  } else {
+    if (t1) t1.textContent = "Cyan: ";
+    if (t2) t2.textContent = "Magenta: ";
+    if (t3) t3.textContent = "Yellow: ";
+  }
+}
+
+function updateInstructions() {
+  if (!instructionsBox) return;
+  instructionsBox.innerHTML = instructionText[state.mode];
+}
+
+function updateOutputText() {
+  const L = getLightRGB(state.light);
+
+  if (state.mode === "rgb") {
+    outputText.innerHTML =
+      `Mode: RGB (light)<br>` +
+      `R,G,B = (${state.a}, ${state.b}, ${state.c})`;
+  } else {
+    // In CMY we describe pigment strengths as C/M/Y
+    outputText.innerHTML =
+      `Mode: CMY (pigment)<br>` +
+      `C,M,Y = (${state.a}, ${state.b}, ${state.c})<br>` +
+      `Illuminant: ${state.light} ${rgbString(L)}`;
+  }
+}
+
+
+//-------------------------------------------------------------
+// DRAWING
+//-------------------------------------------------------------
+function drawCircle(x, y, r, color) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawRGB() {
+  // Black background looks good for lights
+  ctx.fillStyle = "rgb(0,0,0)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // "lighter" adds color channels like light
+  ctx.globalCompositeOperation = "lighter";
+
+  drawCircle(200, 200, 150, `rgb(${state.a},0,0)`);
+  drawCircle(350, 200, 150, `rgb(0,${state.b},0)`);
+  drawCircle(275, 320, 150, `rgb(0,0,${state.c})`);
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function drawCMY() {
+  // Fill entire canvas with illuminant (this is what you asked for)
+  const L = getLightRGB(state.light);
+  ctx.fillStyle = `rgb(${L.r},${L.g},${L.b})`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Multiply behaves like layering pigments
+  ctx.globalCompositeOperation = "multiply";
+
+  // Convert slider "pigment strength" to an RGB overlay
+  // Bigger slider value = stronger pigment = less of the complementary channel
+  const cStrength = 255 - state.a; // Cyan removes red
+  const mStrength = 255 - state.b; // Magenta removes green
+  const yStrength = 255 - state.c; // Yellow removes blue
+
+  // These colors represent the pigment layers (simplified model)
+  drawCircle(200, 200, 150, `rgb(${cStrength},255,255)`);
+  drawCircle(350, 200, 150, `rgb(255,${mStrength},255)`);
+  drawCircle(275, 320, 150, `rgb(255,255,${yStrength})`);
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (state.mode === "rgb") drawRGB();
+  else drawCMY();
+}
+
+
+//-------------------------------------------------------------
+// EVENT HANDLERS
+//-------------------------------------------------------------
+function handleSliderChange() {
+  state.a = clamp255(slider1.value);
+  state.b = clamp255(slider2.value);
+  state.c = clamp255(slider3.value);
+
+  updateSliderNumbers();
+  updateOutputText();
+  draw();
+}
+
+function handleModeChange(newMode) {
+  state.mode = newMode;
+
+  updateSliderLabels();
+  updateInstructions();
+  updateOutputText();
+  draw();
+}
+
+function handleLightChange() {
+  state.light = lightSelect.value;
+
+  updateOutputText();
+  draw();
+}
+
+
+//-------------------------------------------------------------
+// WIRE UP EVENTS
+//-------------------------------------------------------------
+slider1.addEventListener("input", handleSliderChange);
+slider2.addEventListener("input", handleSliderChange);
+slider3.addEventListener("input", handleSliderChange);
+
+document.querySelectorAll("input[name='mode']").forEach(radio => {
+  radio.addEventListener("change", (e) => {
+    handleModeChange(e.target.value);
+  });
+});
+
+lightSelect.addEventListener("change", handleLightChange);
+
+
+//-------------------------------------------------------------
+// INITIALIZE
+//-------------------------------------------------------------
+function initializeApp() {
+  // Initialize state from actual UI controls
+  state.a = clamp255(slider1.value);
+  state.b = clamp255(slider2.value);
+  state.c = clamp255(slider3.value);
+  state.light = lightSelect.value;
+
+  updateSliderNumbers();
+  updateSliderLabels();
+  updateInstructions();
+  updateOutputText();
+  draw();
+}
+
+initializeApp();
+</script>
+
+</body>
+</html>
