@@ -118,6 +118,10 @@ body {
   background: rgba(255, 255, 255, 0.95);
   transform: scale(1.08);
 }
+.menu-item:hover {
+  background: #ececec;
+}
+border: 1px solid #bbb;
 
 
 
