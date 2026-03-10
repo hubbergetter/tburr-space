@@ -1,48 +1,75 @@
-document.addEventListener("DOMContentLoaded", function () {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Physics Apps</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-  const menuItems = document.querySelectorAll(".menu-item");
-  const previewImage = document.getElementById("preview-image");
-  const launchLink = document.getElementById("launch-link");
-  const description = document.getElementById("app-description");
+<div class="container">
 
-  menuItems.forEach(item => {
-    item.addEventListener("click", function () {
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h2>Physics Apps</h2>
+    <ul>
 
-      menuItems.forEach(i => i.classList.remove("active"));
-      this.classList.add("active");
+      <li class="menu-item active" data-app="color-filters">
+        Color Filters
+      </li>
 
-      const appName = this.dataset.app;
+      <li class="menu-item" data-app="color-mixing">
+        Color Mixing
+      </li>
 
-      if (appName === "color-filters") {
-        previewImage.src = "images/color-filters-preview.png";
-        launchLink.href = "apps/color-filters/index.html";
-        description.textContent =
-          "Interactive RGB and subtractive filter exploration tool.";
-      }
+      <li class="menu-item" data-app="graphics-calculator">
+        Graphics Calculator
+      </li>
 
-      if (appName === "color-mixing") {
-        previewImage.src = "images/color-mixing-preview.png";
-        launchLink.href = "apps/color-mixing/index.html";
-        description.textContent =
-          "Explore additive (RGB) and subtractive (CMY) color mixing using interactive Venn diagrams.";
-      }
+      <li class="menu-item" data-app="snells-law">
+        Snell's Law
+      </li>
 
-      if (appName === "graphics-calculator") {
-        previewImage.src = "images/graphics-calc-preview.png";
-        launchLink.href = "apps/graphics-calculator/index.html";
-        description.textContent =
-          "Interactive graphing calculator for plotting and exploring mathematical functions.";
-      }
+    </ul>
+  </nav>
 
-      if (appName === "snells-law") {
-        previewImage.src = "images/snells-law-preview.png";
-        launchLink.href = "apps/snells-law/index.html";
-        description.textContent =
-          "Investigate refraction using an interactive Snell's Law simulator. Includes a downloadable lab guide.";
-      }
+  <!-- Main Content Area -->
+  <main class="main-panel">
 
-    });
-  });
+    <div class="content-wrapper">
 
-});
+      <div class="preview-container">
+
+        <img id="preview-image"
+             src="images/color-filters-preview.png"
+             alt="Color Filters Preview">
+
+        <a id="launch-link"
+           href="apps/color-filters/index.html"
+           target="_blank"
+           class="play-overlay">
+
+          <div class="play-button">
+            <div class="triangle"></div>
+          </div>
+
+        </a>
+
+      </div>
+
+      <div class="app-description" id="app-description">
+        Interactive RGB and subtractive filter exploration tool.
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="script.js?v=3"></script>
+
+</body>
+</html>
+
 
