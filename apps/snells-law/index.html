@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snell's Law Lab - Linear Regression</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; padding: 20px; color: #1a1a1b; }
+        .app-container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 720px; }
+        canvas { border: 1px solid #ccc; border-radius: 4px; display: block; margin: 0 auto; background: #fff; cursor: crosshair; }
+        .controls { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: 1 / span 2; }
+        label { font-weight: 600; font-size: 0.9em; display: block; margin-bottom: 8px; }
+        select, input[type="range"] { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 25px 0; font-size: 0.9em; table-layout: fixed; }
+        th, td { border: 1px solid #dfe6e9; padding: 10px; text-align: center; }
+        th { background: #f8f9fa; color: #2d3436; }
+        input[type="number"] { width: 85%; padding: 5px; border: 1px solid #b2bec3; border-radius: 4px; text-align: center; }
+        .sine-col { color: #0984e3; font-weight: bold; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { background: #0984e3; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; font-size: 1em; transition: 0.2s; }
+        .btn:hover { background: #074b81; }
+        .btn-secondary { background: #636e72; }
+        .btn-secondary:hover { background: #2d3436; }
+        
+        #resultsArea { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        .hidden { display: none; }
+        .index-box { background: #f1f2f6; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.9em; column-count: 2; border-left: 4px solid #0984e3; }
+        .equation { text-align: center; font-size: 1.25em; margin: 20px 0; color: #d63031; font-weight: bold; }
+        .tooltip-info { font-size: 0.8em; color: #636e72; text-align: center; margin-top: 5px; }
+
+        /* Print styling to make the report look clean */
+        @media print {
+            body { background: white; padding: 0; }
+            .app-container { box-shadow: none; width: 100%; border: none; }
+            .controls, .btn-group, .tooltip-info, hr, h2, #checkToggle, #indexTable { display: none !important; }
+            #mainCanvas { display: none !important; }
+            #resultsArea { display: block !important; border: none; }
+            input { border: none !important; appearance: none; -moz-appearance: textfield; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="labReport">
+    <h2 style="text-align: center; margin-top: 0;">Snell's Law Simulation & Analysis</h2>
+    
+    <canvas id="mainCanvas" width="660" height="400"></canvas>
+    <p class="tooltip-info">Tip: Hover your mouse over the orange ray for a precise A<sub>r</sub> reading.</p>
+
+    <div class="controls">
+        <div>
+            <label>Upper Medium (n<sub>i</sub>)</label>
+            <select id="niSelect">
+                <option value="1.00">Air (1.00)</option>
+                <option value="1.33">Water (1.33)</option>
+                <option value="1.52">Glass (1.52)</option>
+                <option value="2.42">Diamond (2.42)</option>
+            </select>
+        </div>
+        <div>
+            <label>Lower Medium (Substance)</label>
+            <select id="nrSelect">
+                <option value="1.00">Air</option>
+                <option value="1.31">Ice</option>
+                <option value="1.33" selected>Water</option>
+                <option value="1.36">Ethyl Alcohol</option>
+                <option value="1.52">Glass</option>
+                <option value="1.62">Flint Glass</option>
+                <option value="2.42">Diamond</option>
+            </select>
+        </div>
+        
+        <div class="full-width">
+            <label>Angle of Incidence (A<sub>i</sub>): <span id="aiValDisplay">30.0</span>°</label>
+            <input type="range" id="aiSlider" min="20" max="70" step="0.1" value="30">
+        </div>
+
+        <div><label><input type="checkbox" id="rayToggle" checked> Ray On/Off</label></div>
+        <div><label><input type="checkbox" id="protractorToggle" checked> Show Protractor</label></div>
+    </div>
+
+    <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
+
+    <h3>Data Collection Table</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 12%;">Trial</th>
+                <th>A<sub>i</sub> (deg)</th>
+                <th>A<sub>r</sub> (deg)</th>
+                <th>sin(A<sub>i</sub>) (x)</th>
+                <th>sin(A<sub>r</sub>) (y)</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="btn-group">
+        <button class="btn" id="calculateBtn">Generate Regression Graph</button>
+        <button class="btn btn-secondary" id="printBtn">Print Lab Data</button>
+    </div>
+
+    <div id="resultsArea" class="hidden">
+        <canvas id="graphCanvas" width="660" height="400"></canvas>
+        <div id="equationOutput" class="equation"></div>
+        
+        <div style="text-align: center; margin-bottom: 10px;">
+            <label style="display: inline-block; cursor: pointer; color: #0984e3;">
+                <input type="checkbox" id="checkToggle"> <u>Show Index of Refraction Table</u>
+            </label>
+        </div>
+        
+        <div id="indexTable" class="hidden index-box">
+            Air: 1.00<br>Ice: 1.31<br>Water: 1.33<br>Ethyl Alcohol: 1.36<br>
+            Fused Quartz: 1.46<br>Glycerin: 1.47<br>Crown Glass: 1.52<br>
+            Flint Glass: 1.62<br>Zircon: 1.92<br>Diamond: 2.42
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Variable Declarations ---
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const gCanvas = document.getElementById('graphCanvas');
+    const gCtx = gCanvas.getContext('2d');
+
+    const niSelect = document.getElementById('niSelect');
+    const nrSelect = document.getElementById('nrSelect');
+    const aiSlider = document.getElementById('aiSlider');
+    const rayToggle = document.getElementById('rayToggle');
+    const protractorToggle = document.getElementById('protractorToggle');
+    const tableBody = document.getElementById('tableBody');
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let isHoveringRay = false;
+    let currentAr = 0;
+
+    // --- Table Generation ---
+    for (let i = 1; i <= 8; i++) {
+        tableBody.innerHTML += `
+            <tr>
+                <td>${i}</td>
+                <td><input type="number" step="0.1" class="ai-deg" oninput="updateSines(this)"></td>
+                <td><input type="number" step="0.1" class="ar-deg" oninput="updateSines(this)"></td>
+                <td class="sine-col ai-sine">-</td>
+                <td class="sine-col ar-sine">-</td>
+            </tr>`;
+    }
+
+    // --- Data Table Logic ---
+    function updateSines(inputEl) {
+        const row = inputEl.parentElement.parentElement;
+        const ai = row.querySelector('.ai-deg').value;
+        const ar = row.querySelector('.ar-deg').value;
+
+        row.querySelector('.ai-sine').innerText = ai ? Math.sin(ai * Math.PI / 180).toFixed(4) : "-";
+        row.querySelector('.ar-sine').innerText = ar ? Math.sin(ar * Math.PI / 180).toFixed(4) : "-";
+    }
+
+    // --- Main Simulation Drawing ---
+    function draw() {
+        // 1. Clear the canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        //Find cx and cy, the center of the main canvas
+		const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+		//Find the maximum length of an array, maxLen
+        const maxLen = (canvas.height * 0.75) / 2;
+
+        // 2. Draw Backgrounds
+        ctx.fillStyle = "#e3f2fd"; //Color for upper medium a light blue
+        ctx.fillRect(0, 0, canvas.width, cy);  
+        ctx.fillStyle = "#bbdefb";  //Color for lower medium a slightly darker blue
+        ctx.fillRect(0, cy, canvas.width, cy);
+
+        // 3. For the normal line, draw a dashed line
+		//The 5 and the 8 in [5,8] in setLineDash([5, 8]) represent pixel lengths.
+		//The 5 is the length of the dash and the 8 the length of the gaps between dashes.
+		ctx.setLineDash([5, 8]);
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, canvas.height);
+        ctx.strokeStyle = "#7f8c8d";
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 4. Draw Protractor
+        if (protractorToggle.checked) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.beginPath();
+            ctx.arc(0, 0, 160, 0, Math.PI);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.fill();
+            ctx.strokeStyle = "#2c3e50";
+            ctx.stroke();
+
+            for (let i = -90; i <= 90; i += 1) {
+                const rad = (i + 90) * (Math.PI / 180);
+                const isMajor = (i % 10 === 0);
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(rad) * 160, Math.sin(rad) * 160);
+                ctx.lineTo(Math.cos(rad) * (isMajor ? 142 : 150), Math.sin(rad) * (isMajor ? 142 : 150));
+                ctx.lineWidth = isMajor ? 1.5 : 0.5;
+                ctx.stroke();
+                if (isMajor) {
+                    ctx.font = "bold 11px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#000";
+                    ctx.fillText(Math.abs(i), Math.cos(rad) * 128, Math.sin(rad) * 128 + 4);
+                }
+            }
+            ctx.restore();
+        }
+
+        // 5. Draw Rays and Check for Hover
+        isHoveringRay = false;
+        if (rayToggle.checked) {
+            const ni = parseFloat(niSelect.value);
+            const nr = parseFloat(nrSelect.value);
+            const aiRad = parseFloat(aiSlider.value) * (Math.PI / 180);
+
+            // Incident Ray
+            ctx.beginPath();
+            ctx.moveTo(cx - Math.sin(aiRad) * maxLen, cy - Math.cos(aiRad) * maxLen);
+            ctx.lineTo(cx, cy);
+            ctx.strokeStyle = "#e74c3c";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+			
+			// Draw Ai angle arc
+			ctx.beginPath();
+			ctx.strokeStyle = "#2c3e50";
+			ctx.lineWidth = 2;
+
+			// arc from normal to incident ray
+			ctx.arc(cx, cy, 50, -Math.PI/2 - aiRad, -Math.PI/2);
+			ctx.stroke();
+
+			// label Ai
+			ctx.fillStyle = "#2c3e50";
+			ctx.font = "bold 14px Arial";
+			ctx.textAlign = "center";
+
+			const labelX = cx + Math.cos(-Math.PI/2 + aiRad/2) * 70;
+			const labelY = cy + Math.sin(-Math.PI/2 + aiRad/2) * 70;
+
+			ctx.fillText(`Ai = ${parseFloat(aiSlider.value).toFixed(1)}°`, labelX, labelY);
+
+            // Refracted Ray Calculation
+            const sinAr = (ni * Math.sin(aiRad)) / nr;
+            if (Math.abs(sinAr) <= 1) {
+                currentAr = Math.asin(sinAr) * (180 / Math.PI);
+                const arRad = Math.asin(sinAr);
+                const x2 = cx + Math.sin(arRad) * maxLen;
+                const y2 = cy + Math.cos(arRad) * maxLen;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = "#f39c12";
+                ctx.stroke();
+
+                // Mouse collision detection
+                const dist = distToSegment({ x: mouseX, y: mouseY }, { x: cx, y: cy }, { x: x2, y: y2 });
+                if (dist < 10 && mouseY > cy) {
+                    isHoveringRay = true;
+                }
+            }
+        }
+
+        // 6. Draw Hover Tooltip (Last to ensure it's on top)
+        if (isHoveringRay) {
+            const boxW = 90;
+            const boxH = 30;
+            const tx = mouseX + 15;
+            const ty = mouseY - 35;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+            ctx.beginPath();
+            if (ctx.roundRect) {
+                ctx.roundRect(tx, ty, boxW, boxH, 6);
+            } else {
+                ctx.rect(tx, ty, boxW, boxH);
+            }
+            ctx.fill();
+
+            ctx.fillStyle = "white";
+            ctx.font = "bold 13px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`Aᵣ: ${currentAr.toFixed(1)}°`, tx + (boxW / 2), ty + (boxH / 2));
+
+            // Reset alignment for next frame
+            ctx.textAlign = "start";
+            ctx.textBaseline = "alphabetic";
+        }
+    }
+
+    // --- Geometry Helper ---
+    function distToSegment(p, v, w) {
+        const l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+        if (l2 == 0) return Math.sqrt(Math.pow(p.x - v.x, 2) + Math.pow(p.y - v.y, 2));
+        let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.sqrt(Math.pow(p.x - (v.x + t * (w.x - v.x)), 2) + Math.pow(p.y - (v.y + t * (w.y - v.y)), 2));
+    }
+
+    // --- Regression and Graphing ---
+    function drawGraph(dx, dy, m, b) {
+        gCtx.clearRect(0, 0, gCanvas.width, gCanvas.height);
+        const pad = 60;
+        const w = gCanvas.width - (2 * pad);
+        const h = gCanvas.height - (2 * pad);
+
+        gCtx.strokeStyle = "#000";
+        gCtx.lineWidth = 2;
+        gCtx.beginPath();
+        gCtx.moveTo(pad, pad);
+        gCtx.lineTo(pad, gCanvas.height - pad);
+        gCtx.lineTo(gCanvas.width - pad, gCanvas.height - pad);
+        gCtx.stroke();
+
+        gCtx.font = "bold 13px Arial";
+        gCtx.fillStyle = "#000";
+        gCtx.textAlign = "center";
+        gCtx.fillText("sin(Ai) - Independent (x)", gCanvas.width / 2, gCanvas.height - 20);
+
+        gCtx.save();
+        gCtx.translate(20, gCanvas.height / 2);
+        gCtx.rotate(-Math.PI / 2);
+        gCtx.fillText("sin(Ar) - Dependent (y)", 0, 0);
+        gCtx.restore();
+
+        gCtx.fillStyle = "#0984e3";
+        dx.forEach((x, i) => {
+            gCtx.beginPath();
+            gCtx.arc(pad + (x * w), (gCanvas.height - pad) - (dy[i] * h), 5, 0, Math.PI * 2);
+            gCtx.fill();
+        });
+
+        gCtx.strokeStyle = "#d63031";
+        gCtx.setLineDash([5, 5]);
+        gCtx.beginPath();
+        gCtx.moveTo(pad, (gCanvas.height - pad) - (b * h));
+        gCtx.lineTo(pad + w, (gCanvas.height - pad) - ((m + b) * h));
+        gCtx.stroke();
+        gCtx.setLineDash([]);
+    }
+
+    // --- Event Listeners ---
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+        draw();
+    });
+
+    document.getElementById('calculateBtn').onclick = () => {
+        let dx = [];
+        let dy = [];
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            const x = row.querySelector('.ai-sine').innerText;
+            const y = row.querySelector('.ar-sine').innerText;
+            if (x !== "-" && y !== "-") {
+                dx.push(parseFloat(x));
+                dy.push(parseFloat(y));
+            }
+        });
+
+        if (dx.length < 2) return alert("Please complete at least 2 rows.");
+
+        const n = dx.length;
+        const sumX = dx.reduce((a, b) => a + b, 0);  //a = The Accumulator (The running total) and b = The Current Item
+        const sumY = dy.reduce((a, b) => a + b, 0);
+        const sumXY = dx.reduce((s, x, i) => s + (x * dy[i]), 0);
+        const sumXX = dx.reduce((s, x) => s + (x * x), 0); //s = (Sum  Accumulator): This is your running total. It starts at 0.
+		                                                   // x (Current Value)
+														   // 0 = inital fpr s
+        const m = ((n * sumXY) - (sumX * sumY)) / ((n * sumXX) - (sumX * sumX));
+        const b = (sumY - (m * sumX)) / n;
+
+        document.getElementById('resultsArea').classList.remove('hidden');
+        document.getElementById('equationOutput').innerHTML = `sin(A<sub>r</sub>) = ${m.toFixed(4)} * sin(A<sub>i</sub>) + ${b.toFixed(4)}`;
+        drawGraph(dx, dy, m, b);
+    };
+
+    document.getElementById('printBtn').onclick = () => { window.print(); };
+    aiSlider.oninput = () => {
+        document.getElementById('aiValDisplay').innerText = parseFloat(aiSlider.value).toFixed(1);
+        draw();
+    };
+    niSelect.onchange = draw;  //draw is a callback, not the same as draw()
+	
+    nrSelect.onchange = draw;
+    rayToggle.onchange = draw;
+    protractorToggle.onchange = draw;
+    document.getElementById('checkToggle').onchange = (e) => {
+        document.getElementById('indexTable').classList.toggle('hidden', !e.target.checked);
+    };
+
+    // Initial draw
+    draw();
+</script>
+</body>
+</html>
