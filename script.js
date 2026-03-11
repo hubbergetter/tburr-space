@@ -40,9 +40,16 @@ document.addEventListener("DOMContentLoaded", function () {
         description.textContent =
           "Investigate refraction using an interactive Snell's Law simulator. Includes a downloadable lab guide.";
       }
+      if (appName === "thin-lenses") {
+        previewImage.src = "images/thin-lenses-preview.png";
+        launchLink.href = "apps/thin-lenses/index.html";
+        description.textContent =
+          "Investigate converging and diverging thin lenses.";
+      }
 
     });
   });
 
 });
+
 
