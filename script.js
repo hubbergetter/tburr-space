@@ -46,10 +46,17 @@ document.addEventListener("DOMContentLoaded", function () {
         description.textContent =
           "Investigate converging and diverging thin lenses.";
       }
+      if (appName === "thin-mirrors") {
+        previewImage.src = "images/thin-mirrors-preview.png";
+        launchLink.href = "apps/thin-mirrors/index.html";
+        description.textContent =
+          "Investigate converging and diverging thin Mirrors.";
+      }
 
     });
   });
 
 });
+
 
 
