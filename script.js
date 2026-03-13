@@ -52,6 +52,12 @@ document.addEventListener("DOMContentLoaded", function () {
         description.textContent =
           "Investigate converging and diverging thin Mirrors.";
       }
+      if (appName === "projectile-motion") {
+        previewImage.src = "images/projectile-motion-preview.png";
+        launchLink.href = "apps/projectile-motion/index.html";
+        description.textContent =
+          "Investigate Projectile Motion.";
+      }
 
     });
   });
