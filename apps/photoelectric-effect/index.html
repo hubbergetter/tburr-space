@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photoelectric Effect</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <header class="top-bar">
+      <div style="margin-bottom:20px;">
+        <h1>Photoelectric Effect</h1>
+        <p class="subtitle">Light ejects electrons from a metal surface</p>
+         <a href="photoelectric-effect.pdf" target="_blank" style="color:#6cf;">
+          📄 Read the Photoelectric Effect Law Lab Guide (PDF)
+         </a>
+      </div>
+    </header>
+
+    <main class="layout">
+
+      <!-- LEFT: simulation area -->
+      <section class="sim-panel">
+        <canvas id="simCanvas" width="900" height="520"></canvas>
+
+        <div class="sim-legend">
+          <span><span class="legend-box cathode-box"></span>Emitter plate</span>
+          <span><span class="legend-box anode-box"></span>Collector plate</span>
+          <span><span class="legend-box electron-box"></span>Photoelectrons</span>
+        </div>
+      </section>
+
+      <!-- RIGHT: controls -->
+      <aside class="control-panel">
+
+        <div class="card">
+          <h2>Controls</h2>
+
+          <label for="metalSelect">Emitter Metal</label>
+          <select id="metalSelect">
+            <option value="cesium">Cesium</option>
+            <option value="potassium">Potassium</option>
+            <option value="sodium" selected>Sodium</option>
+            <option value="zinc">Zinc</option>
+            <option value="copper">Copper</option>
+          </select>
+
+          <label for="wavelengthSlider">
+            Wavelength:
+            <span id="wavelengthValue">550</span> nm
+          </label>
+          <input type="range" id="wavelengthSlider" min="100" max="800" step="3" value="550" />
+
+          <div class="spectrum-wrap">
+            <div class="spectrum-bar"></div>
+            <div id="spectrumPointer"></div>
+            <div class="spectrum-labels">
+              <span>UV</span>
+              <span>Visible</span>
+              <span>IR</span>
+            </div>
+          </div>
+
+          <label for="intensitySlider">
+            Light Intensity:
+            <span id="intensityValue">55</span>%
+          </label>
+          <input type="range" id="intensitySlider" min="0" max="100" value="55" />
+
+          <label for="voltageSlider">
+            Battery Voltage:
+            <span id="voltageValue">0.00</span> V
+          </label>
+          <input type="range" id="voltageSlider" min="-5.0" max="2.0" step="0.01" value="0" />
+
+          <div class="toggle-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="showElectronsCheckbox" checked />
+              Show photoelectrons
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <button id="pauseBtn">Pause</button>
+            <button id="resetBtn">Reset</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Readouts</h2>
+          <div class="readout-grid">
+            <div class="readout-label">Photon Energy</div>
+            <div class="readout-value" id="photonEnergyDisplay">0.00 eV</div>
+
+            <div class="readout-label">Work Function</div>
+            <div class="readout-value" id="workFunctionDisplay">0.00 eV</div>
+
+            <div class="readout-label">Threshold λ</div>
+            <div class="readout-value" id="thresholdDisplay">0 nm</div>
+
+            <div class="readout-label">Max KE</div>
+            <div class="readout-value" id="keDisplay">0.00 eV</div>
+
+            <div class="readout-label">Current</div>
+            <div class="readout-value current-readout" id="currentDisplay">0.000 μA</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>What to Notice</h2>
+          <ul class="notes">
+            <li>If the wavelength is too long, no electrons are emitted.</li>
+            <li>Increasing intensity makes more electrons leave the surface.</li>
+            <li>Shorter wavelength means higher photon energy.</li>
+            <li>Negative voltage can stop electrons from reaching the collector.</li>
+          </ul>
+        </div>
+
+      </aside>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
