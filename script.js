@@ -58,6 +58,12 @@ document.addEventListener("DOMContentLoaded", function () {
         description.textContent =
           "Investigate Projectile Motion.";
       }
+      if (appName === "photoelectric-effect") {
+        previewImage.src = "images/photoelectric-effect-preview.png";
+        launchLink.href = "apps/photoelectric-effect/index.html";
+        description.textContent =
+          "Investigate the Photoelectric Effect.";
+      }
 
     });
   });
